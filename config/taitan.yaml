@@ -1,0 +1,16 @@
+app:
+  name: Titan
+  env: dev            # dev | prod
+  debug: true
+
+scheduler:
+  interval_sec: 10    # 메인 루프 주기 (초)
+
+trading:
+  enabled: false
+  buy_threshold_pct: 20.0
+  max_positions: 3
+
+log:
+  level: INFO
+  file: titan.log

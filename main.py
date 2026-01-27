@@ -37,7 +37,7 @@ def main():
     print("=" * 50)
 
     # 실제 앱 실행은 app 계층에 위임
-    from titan.app.app import run
+    from taitan.app.app import run
     run(
         base_dir=base_dir,
         config_dir=config_dir,
