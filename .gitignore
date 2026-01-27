@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+
+# venv
+.venv/
+venv/
+
+# logs
+logs/
+
+# build artifacts
+build/
+dist/
+
+# OS
+.DS_Store
+
+# env (보안)
+config/*.env
