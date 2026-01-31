@@ -56,6 +56,17 @@ class State:
 
         self.logger.info("State initialized")
 
+    def _load(self):
+        if self.state_file.exists():
+            with open(self.state_file, "r") as f:
+                data = json.load(f)
+        else:
+            data = {}
+
+        self.position = data.get("position", "NONE")
+        self.ticker = data.get("ticker")
+        self.entry_price = data.get("entry_price")
+        self.traded_tickers = data.get("traded_tickers", [])
     # ==================================================
     # 상태 반영
     # ==================================================
@@ -147,3 +158,49 @@ class State:
         self.traded_tickers = set(data.get("traded_tickers", []))
 
         self.logger.info("State loaded from file")
+
+    def enter_position(self, ticker: str, entry_price: float):
+        take_profit_rate = self.data.get("take_profit_rate", 5.0)
+        stop_loss_rate = self.data.get("stop_loss_rate", -2.0)
+    
+        take_profit_price = entry_price * (1 + take_profit_rate / 100)
+        stop_loss_price = entry_price * (1 + stop_loss_rate / 100)
+    
+        self.data.update({
+            "position": "HOLDING",
+            "ticker": ticker,
+            "entry_price": entry_price,
+            "take_profit_price": round(take_profit_price, 2),
+            "stop_loss_price": round(stop_loss_price, 2),
+        })
+    
+        self.data.setdefault("traded_tickers", []).append(ticker)
+    
+        self._save()
+    
+        self.logger.info(
+            "ENTER POSITION: %s entry=%.2f TP=%.2f SL=%.2f",
+            ticker,
+            entry_price,
+            take_profit_price,
+            stop_loss_price,
+        )
+
+    def exit_position(self):
+        self.logger.info(
+            "EXIT POSITION: %s",
+            self.data.get("ticker"),
+        )
+    
+        self.data.update({
+            "position": "NONE",
+            "ticker": None,
+            "entry_price": None,
+            "take_profit_price": None,
+            "stop_loss_price": None,
+            "news_reference_price": None,
+            "news_reference_time": None,
+        })
+    
+        self._save()
+    

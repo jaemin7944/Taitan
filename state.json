@@ -1,13 +1,13 @@
 {
-  "position": "NONE",
-  "ticker": null,
-  "entry_price": null,
+  "position": "HOLDING",
+  "ticker": "AAPL",
+  "entry_price": 180.0,
   "news_reference_price": null,
   "news_reference_time": null,
   "last_top3_news_ids": [
-    "n1",
-    "n2",
-    "n3"
+    "force_9115253ea9514dd0bd73fae08ce57d7b_1",
+    "force_9115253ea9514dd0bd73fae08ce57d7b_2",
+    "force_9115253ea9514dd0bd73fae08ce57d7b_3"
   ],
   "price_change_threshold": 3.0,
   "traded_tickers": []

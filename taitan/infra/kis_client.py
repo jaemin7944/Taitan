@@ -3,7 +3,7 @@
 import requests
 import time
 from typing import Dict
-
+from typing import Optional, Dict
 
 class KisClient:
     def __init__(self, app_key, app_secret, base_url):
@@ -66,6 +66,31 @@ class KisClient:
         )
         res.raise_for_status()
         return res.json()
+    
     def _ensure_token(self):
         if not self.access_token or time.time() >= self.token_expired_at:
             self._issue_token()
+
+    def post(
+        self,
+        path: str,
+        tr_id: str,
+        json_body: dict,
+        headers_extra: Optional[Dict[str, str]] = None,
+    ):
+        self._ensure_token()
+        headers = {
+            "authorization": f"Bearer {self.access_token}",
+            "appkey": self.app_key,
+            "appsecret": self.app_secret,
+            "tr_id": tr_id,
+            "content-type": "application/json",
+            "custtype": "P",
+        }
+        if headers_extra:
+            headers.update(headers_extra)
+
+        url = f"{self.base_url}{path}"
+        res = self.session.post(url, headers=headers, json=json_body, timeout=10)
+        res.raise_for_status()
+        return res.json()
