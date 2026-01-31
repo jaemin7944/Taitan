@@ -35,3 +35,26 @@ class NewsCollector:
         )
 
         return dummy_news
+    
+    def fetch_top3(self):
+        return [
+            {
+                "id": "n1",
+                "title": "Dummy news 1",
+                "tickers": ["AAPL"],
+                "published_at": "...",
+            },
+            {
+                "id": "n2",
+                "title": "Dummy news 2",
+                "tickers": ["TSLA"],
+                "published_at": "...",
+            },
+            {
+                "id": "n3",
+                "title": "Dummy news 3",
+                "tickers": ["NVDA"],
+                "published_at": "...",
+            },
+        ]
+

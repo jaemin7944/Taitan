@@ -1,0 +1,14 @@
+{
+  "position": "NONE",
+  "ticker": null,
+  "entry_price": null,
+  "news_reference_price": null,
+  "news_reference_time": null,
+  "last_top3_news_ids": [
+    "n1",
+    "n2",
+    "n3"
+  ],
+  "price_change_threshold": 3.0,
+  "traded_tickers": []
+}
