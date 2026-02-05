@@ -1,13 +1,13 @@
 {
-  "position": "HOLDING",
-  "ticker": "AAPL",
-  "entry_price": 180.0,
+  "position": "NONE",
+  "ticker": null,
+  "entry_price": null,
   "news_reference_price": null,
   "news_reference_time": null,
   "last_top3_news_ids": [
-    "force_9115253ea9514dd0bd73fae08ce57d7b_1",
-    "force_9115253ea9514dd0bd73fae08ce57d7b_2",
-    "force_9115253ea9514dd0bd73fae08ce57d7b_3"
+    "/news/NIO/nio-inc-announces-profit-alert-for-the-fourth-quarter-of-zfihh300o2pl.html",
+    "/news/BNAI/brand-engagement-network-terminates-50-million-standby-equity-0dsj9rovag6g.html",
+    "/news/DVLT/datavault-ai-chief-executive-officer-and-president-issues-letter-to-xj1rmcgk3wr2.html"
   ],
   "price_change_threshold": 3.0,
   "traded_tickers": []

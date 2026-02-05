@@ -18,3 +18,5 @@ dist/
 
 # env (보안)
 config/*.env
+
+config/taitan.yaml

@@ -203,4 +203,13 @@ class State:
         })
     
         self._save()
-    
+        
+    def set_news_reference(self, price: float, time: datetime):
+        self.news_reference_price = price
+        self.news_reference_time = time
+        self.save()
+
+    def clear_news_reference(self):
+        self.news_reference_price = None
+        self.news_reference_time = None
+        self.save()

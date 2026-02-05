@@ -23,6 +23,11 @@ kis:
   acnt_prdt_cd: "01"
 
 trade:
-  dry_run: true          # 처음엔 true로 무조건 테스트
+  dry_run: false          # 처음엔 true로 무조건 테스트
   ovrs_excg_cd: "NAS"    # 나스닥(예: NAS)
   order_div: "00"        # 지정가 등 (너가 쓰던 값 유지)
+  buy_breakout_pct: 0.5
+
+openai:
+  api_key: "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"
+  model: "gpt-4o-mini"

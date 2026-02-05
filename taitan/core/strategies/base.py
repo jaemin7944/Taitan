@@ -8,6 +8,13 @@ class BaseStrategy(ABC):
         self.config = config
         self.logger = logger
 
+    def peek_ticker(self, news_list):
+        if not news_list:
+            return None
+        first = news_list[0]
+        tickers = first.get("tickers", [])
+        return tickers[0] if tickers else None
+
     @abstractmethod
     def evaluate(self, news_list: List[Dict]) -> Optional[Decision]:
         pass
