@@ -29,5 +29,5 @@ trade:
   buy_breakout_pct: 0.5
 
 openai:
-  api_key: "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"
+  api_key: ""
   model: "gpt-4o-mini"

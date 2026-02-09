@@ -4,11 +4,7 @@
   "entry_price": null,
   "news_reference_price": null,
   "news_reference_time": null,
-  "last_top3_news_ids": [
-    "/news/NIO/nio-inc-announces-profit-alert-for-the-fourth-quarter-of-zfihh300o2pl.html",
-    "/news/BNAI/brand-engagement-network-terminates-50-million-standby-equity-0dsj9rovag6g.html",
-    "/news/DVLT/datavault-ai-chief-executive-officer-and-president-issues-letter-to-xj1rmcgk3wr2.html"
-  ],
+  "last_top3_news_ids": [],
   "price_change_threshold": 3.0,
   "traded_tickers": []
 }

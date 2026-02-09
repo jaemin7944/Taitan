@@ -9,6 +9,7 @@ from taitan.infra.kis_client import KisClient
 from pathlib import Path
 from taitan.broker.kis_broker import KisBroker
 from taitan.utils.time import is_us_regular_market_open
+from taitan.core.gpt_cache import GPTCache
 class Engine:
     """
     타이탄 엔진
@@ -53,6 +54,9 @@ class Engine:
         # 전략
         # -------------------------
         self.strategy = GPTNewsStrategy(config, logger)
+
+        cache_file = Path("gpt_cache.json")
+        self.gpt_cache = GPTCache(cache_file, logger)
 
         self.logger.info("Engine initialized")
 
@@ -129,9 +133,32 @@ class Engine:
                     )
 
         # =================================================
-        # 3. 전략 판단
+        # 3. 전략 판단 (GPT 캐싱 적용)
         # =================================================
-        decision = self.strategy.evaluate(top3_news)
+        decision = None
+
+        top3_news = self.news_collector.fetch_top3()
+
+        if not top3_news:
+            self.logger.warning("No news fetched, skip this tick")
+            return
+
+        primary_news = top3_news[0]
+        news_id = primary_news["id"]
+
+        # 1️⃣ GPT 캐시 확인
+        cached_decision = self.gpt_cache.get(news_id)
+        if cached_decision:
+            self.logger.info("Using cached GPT decision for %s", news_id)
+            decision = cached_decision
+        else:
+            # 2️⃣ 캐시 없을 때만 GPT 호출
+            decision = self.strategy.evaluate(top3_news)
+
+            if decision:
+                self.gpt_cache.set(news_id, decision)
+                self.logger.info("GPT decision cached for %s", news_id)
+
         if not decision:
             return
 
@@ -147,7 +174,7 @@ class Engine:
         # 4. BUY 처리 (정규장 + 돌파 조건)
         # =================================================
         if decision.action == "BUY" and self.state.position == "NONE":
-
+        
             if not is_us_regular_market_open(now):
                 self.logger.info("Market closed (US regular hours only), skip BUY")
                 return
@@ -191,6 +218,7 @@ class Engine:
             )
 
             self.state.clear_news_reference()
+
 
     def _exit_position(self, action: str, price: float):
         ticker = self.state.data["ticker"]
