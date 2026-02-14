@@ -11,9 +11,20 @@ class BaseStrategy(ABC):
     def peek_ticker(self, news_list):
         if not news_list:
             return None
-        first = news_list[0]
-        tickers = first.get("tickers", [])
-        return tickers[0] if tickers else None
+    
+        link = news_list[0].get("link")
+        if not link:
+            return None
+    
+        parts = link.split("/")
+        # ... /news/DBGI/...
+        if "news" in parts:
+            idx = parts.index("news")
+            if len(parts) > idx + 1:
+                return parts[idx + 1].upper()
+    
+        return None
+    
 
     @abstractmethod
     def evaluate(self, news_list: List[Dict]) -> Optional[Decision]:

@@ -1,70 +1,127 @@
 # taitan/data/market.py
-from typing import Optional
+
+from typing import Optional, Dict
+
 
 class Market:
-    def __init__(self, kis_client, logger):
+    """
+    조회 전용 레이어
+    - 현재가 조회
+    - 해외 보유 종목 조회
+    """
+
+    def __init__(self, kis_client, logger, cano: str, acnt_prdt_cd: str):
         self.kis = kis_client
         self.logger = logger
+        self.cano = cano
+        self.acnt_prdt_cd = acnt_prdt_cd
 
+    # =====================================================
+    # 1️⃣ 현재가 조회
+    # =====================================================
     def get_current_price(self, ticker: str) -> Optional[float]:
+
         res = self.kis.get(
             path="/uapi/overseas-price/v1/quotations/price",
-            tr_id="FHKST01010100",
+            tr_id="HHDFS00000300",
             params={
-                "FID_COND_MRKT_DIV_CODE": "J",   # 해외주식
-                "FID_INPUT_ISCD": ticker.upper()
+                "AUTH": "",
+                "EXCD": "NAS",
+                "SYMB": ticker.upper(),
             },
         )
 
         output = res.get("output")
         if not output:
-            self.logger.error(f"Response received but 'output' is missing: {res}")
-            return None 
-
-        # 한투 해외주식 현재가 필드 우선순위
-        # 1. last: 현재가 (정규장 중에는 이 값이 메인)
-        # 2. p_last: 프리/애프터마켓 현재가
-        # 3. base: 전일 종가 (장 시작 전 기준가)
+            self.logger.error(f"[PRICE] output missing: {res}")
+            return None
 
         last = output.get("last")
         p_last = output.get("p_last")
-        base = output.get("base")   
+        base = output.get("base")
 
-        # 값이 있고 0보다 큰지 확인하는 함수
         def valid(v):
-            try: return float(v) if v and float(v) > 0 else None
-            except: return None 
+            try:
+                v = float(v)
+                return v if v > 0 else None
+            except:
+                return None
 
-        # 정규장 중이면 last, 그 외 시간은 p_last, 둘 다 없으면 base 사용
-        price = valid(last) or valid(p_last) or valid(base) 
+        return valid(last) or valid(p_last) or valid(base)
 
-        if price:
-            return price    
+    # =====================================================
+    # 2️⃣ 보유 종목 조회
+    # =====================================================
+    def get_positions(self) -> Dict[str, Dict]:
 
-        self.logger.warning(f"No valid price found in output fields for {ticker}")
-        return None
+        res = self.kis.get(
+            path="/uapi/overseas-stock/v1/trading/inquire-balance",
+            tr_id="TTTS3012R",
+            params={
+                "CANO": self.cano,
+                "ACNT_PRDT_CD": self.acnt_prdt_cd,
+                "OVRS_EXCG_CD": "NASD",
+                "TR_CRCY_CD": "USD",
+                "CTX_AREA_FK200": "",
+                "CTX_AREA_NK200": "",
+            },
+        )
 
-#     def get_current_price(self, ticker: str) -> Optional[float]:
+        output = res.get("output1", [])
+        positions = {}
 
-#         res = self.kis.get(
-#             path="/uapi/overseas-price/v1/quotations/price",
-#             tr_id="FHKST01010100",
-#             params={
-#                 "EXCD": "NAS",
-#                 "SYMB": ticker,
-#             },
-#         )   
+        for item in output:
+            ticker = item.get("ovrs_pdno")
+            qty = int(item.get("ovrs_cblc_qty", 0))
+            avg_price = float(item.get("pchs_avg_pric", 0))
 
-#         if "output1" in res and "last" in res["output1"]:
-#             return float(res["output1"]["last"])    
+            if ticker and qty > 0:
+                positions[ticker] = {
+                    "qty": qty,
+                    "avg_price": avg_price,
+                }
 
-#         if "output" in res and "last" in res["output"]:
-#             return float(res["output"]["last"]) 
+        return positions
 
-#         # 장외 / 시세 없음
-#         self.logger.info("No price available (market closed)")
-#         return None
-
+    # =====================================================
+    # 3️⃣ 보유 여부
+    # =====================================================
+    def is_holding(self, ticker: str) -> bool:
+        positions = self.get_positions()
+        return ticker.upper() in positions
     
-    
+    def check_order_filled(self, order_id: str) -> bool:
+        """
+        주문 체결 여부 확인
+        체결되었으면 True, 아니면 False
+        """
+        try:
+            res = self.kis.get(
+                path="/uapi/overseas-stock/v1/trading/inquire-ccnl",
+                tr_id="TTTS3035R",
+                params={
+                    "CANO": self.cano,
+                    "ACNT_PRDT_CD": self.acnt_prdt_cd,
+                    "ODNO": order_id,
+                    "CTX_AREA_FK200": "",
+                    "CTX_AREA_NK200": ""
+                }
+            )
+
+            if res.get("rt_cd") != "0":
+                self.logger.error("Order check failed: %s", res)
+                return False
+
+            output = res.get("output1", [])
+            if not output:
+                return False
+
+            # 체결수량 확인
+            filled_qty = sum(int(item.get("cncl_qty", 0)) for item in output)
+
+            return filled_qty > 0
+
+        except Exception as e:
+            self.logger.error("Order check exception: %s", e)
+            return False
 

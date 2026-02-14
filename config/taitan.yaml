@@ -8,7 +8,7 @@ scheduler:
 
 trading:
   enabled: false
-  buy_threshold_pct: 0.5
+  buy_threshold_pct: 0.0
   max_positions: 3
 
 log:
@@ -23,11 +23,15 @@ kis:
   acnt_prdt_cd: "01"
 
 trade:
-  dry_run: false          # 처음엔 true로 무조건 테스트
-  ovrs_excg_cd: "NAS"    # 나스닥(예: NAS)
+  dry_run: true          # 처음엔 true로 무조건 테스트
+  ovrs_excg_cd: "NASD"    # 나스닥(예: NAS)
   order_div: "00"        # 지정가 등 (너가 쓰던 값 유지)
   buy_breakout_pct: 0.5
+  qty: 1
+  buy_limit_slip_pct: 1.0
+  sell_limit_slip_pct: 1.0
 
 openai:
   api_key: ""
   model: "gpt-4o-mini"
+
